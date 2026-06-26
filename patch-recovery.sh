@@ -19,6 +19,12 @@ source "${WDIR}/binaries/gofile.sh"
 rm -rf "${WDIR}/recovery/"*
 : > "${WDIR}/log/log.txt"
 
+# Verify recovery directory is actually clean
+if [ -n "$(ls -A ${WDIR}/recovery/ 2>/dev/null)" ]; then
+    warn "[ERROR]" "Failed to clean recovery directory\n"
+    exit 1
+fi
+
 # Define magiskboot's, boot_editor's path and aliases
 export BOOT_EDITOR="${WDIR}/boot_editor_v15_r1/gradlew"
 export MAGISKBOOT="${WDIR}/binaries/magiskboot"
@@ -69,6 +75,21 @@ download_recovery(){
         warn "If you entered a URL, make sure it begins with" "'http://' or 'https://'\n"
         exit 1
     fi
+    
+    # Validate downloaded/copied file size
+    local DOWNLOADED_FILE="${WDIR}/recovery/$(basename "${RECOVERY_LINK}")"
+    if [ ! -f "${DOWNLOADED_FILE}" ]; then
+        warn "[ERROR]" "Failed to download or copy file\n"
+        exit 1
+    fi
+    
+    local FILE_SIZE=$(stat -c%s "${DOWNLOADED_FILE}" 2>/dev/null || echo 0)
+    if [ "$FILE_SIZE" -lt 1000000 ]; then
+        warn "[ERROR]" "Downloaded file seems incomplete or corrupted: ${FILE_SIZE} bytes (expected > 1MB)\n"
+        exit 1
+    fi
+    
+    log "[INFO]" "File validation passed. Size: ${FILE_SIZE} bytes\n"
 }
 
 # Check if the downloaded/copied file an archive
@@ -76,14 +97,15 @@ unarchive_recovery(){
     cd "${WDIR}/recovery/"
     local FILE=$(ls)
     [[ "$FILE" == *.zip ]] && unzip "$FILE" && rm "$FILE"
-    [[ "$FILE" == *.lz4 ]] && lz4 -d "$FILE" "${FILE%.lz4}" > /dev/null 2>&1 && rm "$FILE"
+    # Force overwrite (-f flag) to prevent interactive prompt that was causing issues
+    [[ "$FILE" == *.lz4 ]] && lz4 -d -f "$FILE" "${FILE%.lz4}" > /dev/null 2>&1 && rm "$FILE"
     [[ "$FILE" == *.tar ]] && tar -xf "$FILE" && rm "$FILE"
 
     # Decompress any lz4 files that were extracted from zip/tar archives
     for lz4_file in *.lz4; do
         if [ -f "$lz4_file" ]; then
             log "[INFO]" "Decompressing ${lz4_file}"
-            lz4 -d "$lz4_file" "${lz4_file%.lz4}" >>"${WDIR}/log/log.txt" 2>&1 && rm "$lz4_file"
+            lz4 -d -f "$lz4_file" "${lz4_file%.lz4}" >>"${WDIR}/log/log.txt" 2>&1 && rm "$lz4_file"
         fi
     done
 
@@ -103,6 +125,14 @@ unarchive_recovery(){
 
     export RECOVERY_SIZE=$(stat -c%s "${RECOVERY_FILE}")
     export IMAGE_NAME="$(basename ${RECOVERY_FILE})"
+    
+    # Validate extracted recovery image
+    if [ "$RECOVERY_SIZE" -lt 1000000 ]; then
+        warn "[ERROR]" "Recovery image is too small: ${RECOVERY_SIZE} bytes. File may be corrupted.\n"
+        exit 1
+    fi
+    
+    log "[INFO]" "Recovery image validation passed. Size: ${RECOVERY_SIZE} bytes\n"
 
     cd "${WDIR}/"
 }
@@ -119,8 +149,13 @@ extract_recovery_image(){
     # Copied the file to the boot editor's path
     cp -ar $RECOVERY_FILE "$(dirname $BOOT_EDITOR)" 
 
-    # Unpack
-    r_unpack >>"${WDIR}/log/log.txt" 2>&1 || fatal "Unpacking failed\n"
+    # Unpack with enhanced error reporting
+    if ! r_unpack >>"${WDIR}/log/log.txt" 2>&1; then
+        log "[ERROR]" "Boot image parser failed. Checking recovery.img integrity...\n"
+        # Try to provide more diagnostic info
+        file "$(basename ${RECOVERY_FILE})" >>"${WDIR}/log/log.txt" 2>&1
+        fatal "Unpacking failed. Recovery image may be corrupted or in an unsupported format. Check the logs for details.\n"
+    fi
 
     # check if the binary exists
     FASTBOOTD=$(find . -type f -path "*/system/bin/fastbootd" -exec realpath {} \; 2>/dev/null | head -n 1)
