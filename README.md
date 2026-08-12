@@ -4,7 +4,7 @@ The only working `patch-recovery` tool that ever lived to patch Samsung's recove
 
 > **This is a community fork** of [ravindu644/patch-recovery-revived](https://github.com/ravindu644/patch-recovery-revived) with a workflow fix and device-specific notes for the **Galaxy A14 4G (SM‑A145R, MediaTek Helio G80)**.
 >
-> **Status: patching tested ✅ / flashing NOT yet tested afer the fix ⚠️** — see the SM‑A145R section below.
+> **Status: patching tested ✅ / flashing NOT yet tested after the fix ⚠️** — see the SM‑A145R section below.
 
 <details>
 <summary>Click to view image</summary>
