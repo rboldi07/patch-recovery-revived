@@ -59,7 +59,7 @@ If you flash this on an SM‑A145R, please **open an issue** with:
 
 ### 🟢 GitHub Workflow
 
-1. Star and fork this repository.
+1. Start and fork this repository.
 2. Trigger the workflow manually via the **Actions** tab.
 3. Provide the inputs:
    - **Model**: your device's model number.
