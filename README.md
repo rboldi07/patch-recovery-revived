@@ -23,7 +23,7 @@ The only working `patch-recovery` tool that ever lived to patch Samsung's recove
 
 ### What is verified ✅
 - The workflow successfully unpacks the stock `recovery.img` (full image with ramdisk, ~80 MB), applies **2 hex patches** to the `recovery` binary (`@ 0x00113A44` and `@ 0x00113B84`), and produces an ODIN‑flashable `SM-A145R-Fastbootd-patched-recovery.tar`.
-- Firmware used: `[PUT YOUR BUILD NUMBER HERE, e.g. A145RXXSxxxx]`
+- Firmware used: `[A145RXXSEDZE4]`
 
 ### What is NOT verified ⚠️
 - The output `.tar` has **not been flashed after the fix in the script**. Whether "Enter fastboot" actually appears in recovery is unconfirmed.
