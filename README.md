@@ -1,13 +1,49 @@
-# Patch-Recovery-Revived
+# Patch-Recovery-Revived — SM-A145R Community Fork
 
 The only working `patch-recovery` tool that ever lived to patch Samsung's recovery images to enable **fastbootd mode**.
 
+> **This is a community fork** of [ravindu644/patch-recovery-revived](https://github.com/ravindu644/patch-recovery-revived) with a workflow fix and device-specific notes for the **Galaxy A14 4G (SM‑A145R, MediaTek Helio G80 / a14m)**.
+>
+> **Status: patching tested ✅ / flashing NOT yet tested ⚠️** — see the SM‑A145R section below.
+
 <details>
-  <summary>Click to view image</summary>
-
-  <img src="./resources/1.jpg" alt="Preview" width="600"/>
-
+<summary>Click to view image</summary>
+<img src="./resources/1.jpg" alt="Preview" width="600"/>
 </details>
+
+---
+
+## 🔧 Fix included in this fork
+
+- **Fixed the `Failed to clean recovery directory` crash.** The original cleanup step did not remove hidden files from the work directory, which made the GitHub Action abort at startup with `[ERROR]: Failed to clean recovery directory`. This fork cleans the directory properly so the workflow can run.
+
+---
+
+## 📱 SM-A145R (Galaxy A14 4G / Helio G80) notes
+
+### What is verified ✅
+- The workflow successfully unpacks the stock `recovery.img` (full image with ramdisk, ~80 MB), applies **2 hex patches** to the `recovery` binary (`@ 0x00113A44` and `@ 0x00113B84`), and produces an ODIN‑flashable `SM-A145R-Fastbootd-patched-recovery.tar`.
+- Firmware used: `[PUT YOUR BUILD NUMBER HERE, e.g. A145RXXSxxxx]`
+
+### What is NOT verified ⚠️
+- The output `.tar` has **not been flashed on real hardware yet**. Whether "Enter fastboot" actually appears in recovery is unconfirmed.
+- Flash at your own risk. Keep your stock firmware on hand — if anything goes wrong, reflash the stock `AP_...tar.md5` via Odin (AP slot) to recover.
+
+### Feedback wanted 🙏
+If you flash this on an SM‑A145R, please **open an issue** with:
+1. Your firmware build number
+2. Whether fastbootd / "Enter fastboot" appears in recovery
+3. Any bootloop or stock-restore behaviour
+
+---
+
+## 💡 Tips that made it work (read before running!)
+
+1. **ZIP your image before uploading.** File hosts (catbox, tmpfiles, etc.) rename raw uploads to random names, and the script only accepts files literally named `recovery.img` or `vendor_boot.img`. Zipping preserves the name — the script unzips it automatically.
+2. **Use a real direct-download link.** GitHub Releases and `files.catbox.moe` links work. Webpage-style links (e.g. tmpfiles.org without `/dl/`), Google Drive, MediaFire, etc. will make the script download an HTML page and fail validation.
+3. **Use a FULL recovery image.** If your `recovery.img` is small and has an empty ramdisk (common on newer One UI / Android 15 firmwares), there is nothing to patch. Decompress `recovery.img.lz4` from your AP tar and use the full image. If your device keeps the recovery ramdisk in `vendor_boot.img`, use that instead — the script supports both.
+
+---
 
 ## Features
 
@@ -15,20 +51,14 @@ The only working `patch-recovery` tool that ever lived to patch Samsung's recove
 - Supports both `recovery` and `vendor_boot` images.
 - Automatically downloads and processes recovery images from a provided URL or local path.
 - Hex-patches the recovery binary to enable **fastbootd** mode.
-- **Boot image patching**: You can also upload your `boot.img` along with `recovery.img`/`vendor_boot.img` to patch the boot image, which removes stock recovery auto-restoration issues on some devices.
+- **Boot image patching**: upload your `boot.img` together with `recovery.img`/`vendor_boot.img` to break the boot signature, preventing stock recovery auto-restoration on some devices.
 - Creates an ODIN-flashable `.tar` file for easy flashing.
 
 Notes:
 
-- All the hex patches are located in [this database file](./hex-patches.sh).  
-- On Samsung devices, `vendor_boot` contains the recovery ramdisk, only if the device uses the A/B partition scheme.
-- If you include `boot.img` in your archive (`.zip`, `.tar`, etc.), the script will automatically unpack and repack it to break its signature, preventing stock recovery auto-restoration issues.  
-
-
-
----
-
-If this tool didn’t enable the `fastbootd` mode, it means we need to find your exact `hex` byte sequence to enable it. To learn how to get those values, please refer to the guide on the ["how-to-find-patches"](./how-to-find-patches/) page.
+- All the hex patches are located in [this database file](./hex-patches.sh).
+- On Samsung devices, `vendor_boot` contains the recovery ramdisk only if the device uses the A/B partition scheme.
+- If this tool didn't enable `fastbootd` on your device, your exact hex byte sequence may be missing from the database. See the [how-to-find-patches](./how-to-find-patches/) guide to contribute new ones.
 
 ---
 
@@ -36,45 +66,37 @@ If this tool didn’t enable the `fastbootd` mode, it means we need to find your
 
 ### 🟢 GitHub Workflow
 
-Use the GitHub Actions workflow to automate the process:
-
 1. Star and fork this repository.
 2. Trigger the workflow manually via the **Actions** tab.
-3. Provide the required inputs:
-   - **Model**: Your device's model number.
-   - **Recovery Link**: Direct download link to the recovery image. For a single image, provide a link to an `.img` file. If you want to patch multiple images (e.g., `vendor_boot.img` + `boot.img` or `recovery.img` + `boot.img`) to prevent stock recovery auto-restoration, zip the relevant images together and upload the zip's link.
-   - You can upload the recovery and get a direct link from https://filebin.net/
+3. Provide the inputs:
+   - **Model**: your device's model number.
+   - **Recovery Link**: direct download link to the image (or a `.zip` containing `recovery.img`/`vendor_boot.img` and optionally `boot.img`).
+   - Hosts that work well: https://catbox.moe / https://filebin.net / GitHub Releases.
 
-- The workflow will generate a patched recovery image and upload it as an artifact.
-- If your archive contains `boot.img`, it will be automatically patched to remove stock recovery auto-restoration issues.
-- Optionally uploaded to [GoFile](https://gofile.io/) for easy sharing.
-
-### Output
-
-**The patched recovery image will be available as:**
-- A `.tar` file for ODIN flashing.
+The workflow generates the patched image as an artifact and optionally uploads it to [GoFile](https://gofile.io/).
 
 ### 🟢 Local Usage
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/ravindu644/patch-recovery-revived.git
-   cd patch-recovery-revived
-   ```
+```bash
+git clone https://github.com/rboldi07/patch-recovery-revived.git
+cd patch-recovery-revived
+./patch-recovery.sh <URL/Path to Recovery Image> <Model Number>
+```
 
-2. Run the script:
-   ```bash
-   ./patch-recovery.sh <URL/Path to Recovery Image> <Model Number>
-   ```
+The script will automatically install all required dependencies and process the image.
 
-   The script will automatically install all required dependencies and process the recovery image.
+---
 
-### Note
+## ⚠️ Safety
 
-If the tool does not enable fastboot mode for your device, please start an issue on GitHub. Make sure to upload the `recovery.img` file so the issue can be investigated.
+- Unlocking the bootloader trips Knox and may void your warranty.
+- Always keep the full stock firmware for your exact model/region saved before flashing anything modified.
+- A bad recovery flash is usually recoverable via Download Mode + Odin with the stock `AP` tar.
+
+---
 
 ## Credits
 
 Developed by [@ravindu644](https://github.com/ravindu644).
-
 Got the idea from [phhusson](https://github.com/phhusson), [Johx22](https://github.com/Johx22), [ratcoded](https://github.com/ratcoded).
+SM‑A145R fork & cleanup fix by [@rboldi07](https://github.com/rboldi07).
