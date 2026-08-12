@@ -6,12 +6,13 @@ The only working `patch-recovery` tool that ever lived to patch Samsung's recove
 >
 > **Status: patching tested ✅ / flashing NOT yet tested after the fix ⚠️** — see the SM‑A145R section below.
 
+### 👋 A quick note from me
+I am new to both GitHub and the custom ROM / Android modding community. I created this fork simply because I ran into some bugs while trying to patch the recovery for my own device, and I wanted to share the fixes so others wouldn't get stuck. I don't know everything about reverse-engineering or the deep internals of Samsung's bootloaders, so please bear with me if I can't answer highly technical questions! This project relies on community testing, and any feedback, pull requests, or shared knowledge is hugely appreciated.
+
 <details>
 <summary>Click to view image</summary>
 <img src="./resources/1.jpg" alt="Preview" width="600"/>
 </details>
-
----
 
 ## 🔧 Fix included in this fork
 
@@ -59,7 +60,7 @@ If you flash this on an SM‑A145R, please **open an issue** with:
 
 ### 🟢 GitHub Workflow
 
-1. Start and fork this repository.
+1. Star and fork this repository.
 2. Trigger the workflow manually via the **Actions** tab.
 3. Provide the inputs:
    - **Model**: your device's model number.
@@ -80,6 +81,6 @@ The workflow generates the patched image as an artifact and optionally uploads i
 
 ## Credits
 
-Developed by [@ravindu644](https://github.com/ravindu644).
-Got the idea from [phhusson](https://github.com/phhusson), [Johx22](https://github.com/Johx22), [ratcoded](https://github.com/ratcoded).
-Cleanup fix by [@rboldi07](https://github.com/rboldi07).
+- Developed by [@ravindu644](https://github.com/ravindu644).
+- Got the idea from [phhusson](https://github.com/phhusson), [Johx22](https://github.com/Johx22), [ratcoded](https://github.com/ratcoded).
+- Cleanup fix & SM-A145R notes by [@rboldi07](https://github.com/rboldi07).
