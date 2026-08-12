@@ -68,16 +68,6 @@ If you flash this on an SM‑A145R, please **open an issue** with:
 
 The workflow generates the patched image as an artifact and optionally uploads it to [GoFile](https://gofile.io/).
 
-### 🟢 Local Usage
-
-```bash
-git clone https://github.com/rboldi07/patch-recovery-revived.git
-cd patch-recovery-revived
-./patch-recovery.sh <URL/Path to Recovery Image> <Model Number>
-```
-
-The script will automatically install all required dependencies and process the image.
-
 ---
 
 ## ⚠️ Safety
