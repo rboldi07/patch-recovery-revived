@@ -16,7 +16,8 @@ source "${WDIR}/binaries/env.sh"
 source "${WDIR}/binaries/gofile.sh"
 
 # Clean-up is required
-rm -rf "${WDIR}/recovery/"*
+rm -rf "${WDIR}/recovery"
+mkdir -p "${WDIR}/recovery"
 : > "${WDIR}/log/log.txt"
 
 # Verify recovery directory is actually clean
