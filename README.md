@@ -26,8 +26,8 @@ The only working `patch-recovery` tool that ever lived to patch Samsung's recove
 - Firmware used: `[PUT YOUR BUILD NUMBER HERE, e.g. A145RXXSxxxx]`
 
 ### What is NOT verified ⚠️
-- The output `.tar` has **not been flashed on real hardware yet**. Whether "Enter fastboot" actually appears in recovery is unconfirmed.
-- Flash at your own risk. Keep your stock firmware on hand — if anything goes wrong, reflash the stock `AP_...tar.md5` via Odin (AP slot) to recover.
+- The output `.tar` has **not been flashed after the fix in the script**. Whether "Enter fastboot" actually appears in recovery is unconfirmed.
+- Flash at your own risk.
 
 ### Feedback wanted 🙏
 If you flash this on an SM‑A145R, please **open an issue** with:
@@ -40,8 +40,7 @@ If you flash this on an SM‑A145R, please **open an issue** with:
 ## 💡 Tips that made it work (read before running!)
 
 1. **ZIP your image before uploading.** File hosts (catbox, tmpfiles, etc.) rename raw uploads to random names, and the script only accepts files literally named `recovery.img` or `vendor_boot.img`. Zipping preserves the name — the script unzips it automatically.
-2. **Use a real direct-download link.** GitHub Releases and `files.catbox.moe` links work. Webpage-style links (e.g. tmpfiles.org without `/dl/`), Google Drive, MediaFire, etc. will make the script download an HTML page and fail validation.
-3. **Use a FULL recovery image.** If your `recovery.img` is small and has an empty ramdisk (common on newer One UI / Android 15 firmwares), there is nothing to patch. Decompress `recovery.img.lz4` from your AP tar and use the full image. If your device keeps the recovery ramdisk in `vendor_boot.img`, use that instead — the script supports both.
+2. **Use a FULL recovery image.** If your `recovery.img` is small and has an empty ramdisk (common on newer One UI / Android 15 firmwares), there is nothing to patch. Decompress `recovery.img.lz4` from your AP tar and use the full image. If your device keeps the recovery ramdisk in `vendor_boot.img`, use that instead — the script supports both.
 
 ---
 
@@ -53,12 +52,6 @@ If you flash this on an SM‑A145R, please **open an issue** with:
 - Hex-patches the recovery binary to enable **fastbootd** mode.
 - **Boot image patching**: upload your `boot.img` together with `recovery.img`/`vendor_boot.img` to break the boot signature, preventing stock recovery auto-restoration on some devices.
 - Creates an ODIN-flashable `.tar` file for easy flashing.
-
-Notes:
-
-- All the hex patches are located in [this database file](./hex-patches.sh).
-- On Samsung devices, `vendor_boot` contains the recovery ramdisk only if the device uses the A/B partition scheme.
-- If this tool didn't enable `fastbootd` on your device, your exact hex byte sequence may be missing from the database. See the [how-to-find-patches](./how-to-find-patches/) guide to contribute new ones.
 
 ---
 
@@ -99,4 +92,4 @@ The script will automatically install all required dependencies and process the 
 
 Developed by [@ravindu644](https://github.com/ravindu644).
 Got the idea from [phhusson](https://github.com/phhusson), [Johx22](https://github.com/Johx22), [ratcoded](https://github.com/ratcoded).
-SM‑A145R fork & cleanup fix by [@rboldi07](https://github.com/rboldi07).
+Cleanup fix by [@rboldi07](https://github.com/rboldi07).
